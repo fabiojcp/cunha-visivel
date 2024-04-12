@@ -10,12 +10,10 @@ pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
 workdir = "./assets/pdf"
 output_dir = "./assets/txt/"
 
-# Função para extrair texto de imagens
 def extract_text_from_image(image):
     text = pytesseract.image_to_string(image, lang='por')
     return text
 
-# Processar os arquivos PDF
 for each_path in os.listdir(workdir):
     if each_path.endswith(".pdf"):
         doc = fitz.open(os.path.join(workdir, each_path))
@@ -24,7 +22,7 @@ for each_path in os.listdir(workdir):
             page = doc.load_page(page_num)
             text = page.get_text()
 
-            # Extrair texto das imagens
+
             for img in page.get_images(full=True):
                 xref = img[0]
                 base_image = doc.extract_image(xref)
