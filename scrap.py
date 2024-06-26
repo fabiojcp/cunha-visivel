@@ -5,11 +5,9 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 import time
 
-# Verifica e cria diretório se não existir
 if not os.path.exists("assets/pdf"):
     os.makedirs("assets/pdf")
 
-# Inicializa o arquivo de log se não existir
 log_filename = "./assets/download_log.txt"
 if not os.path.exists(log_filename):
     with open(log_filename, 'w', encoding='utf-8') as f:
@@ -23,13 +21,13 @@ def extract_filename_from_url(pdf_url):
     filename = max(["./assets/pdf/" + f for f in os.listdir("./assets/pdf/")], key=os.path.getctime)
     filename = re.sub(r'\.crdownload$', '', filename)
     filename = re.sub(r'\./assets/pdf/', '', filename)
-    with open(log_filename, 'a', encoding='utf-8') as log_file:  # Abrindo o arquivo de log em modo append
+    with open(log_filename, 'a', encoding='utf-8') as log_file:
         log_file.write(f"Nome do arquivo: {filename}\n")
         log_file.write(f"Link: {pdf_url}\n\n")
 
 def download_pdf(pdf_url, driver):
     driver.execute_script("window.open(arguments[0], '_blank');", pdf_url)
-    time.sleep(1)  # Espera para garantir que o download inicie
+    time.sleep(1)
 
     new_handles = driver.window_handles
     driver.switch_to.window(new_handles[-1])
@@ -55,14 +53,14 @@ try:
         for link in links:
             pdf_url = link.get_attribute('href')
 
-            if not already_downloaded(pdf_url):  # Corrigido para verificar corretamente se já foi baixado
+            if not already_downloaded(pdf_url):
                 download_pdf(pdf_url, driver)
                 extract_filename_from_url(pdf_url)
 
         try:
             next_button = driver.find_element(By.CSS_SELECTOR, 'a.next')
             next_button.click()
-            time.sleep(2)  # Espera para a próxima página carregar
+            time.sleep(2)
         except NoSuchElementException:
             break
 
