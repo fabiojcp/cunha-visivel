@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "cunha-visivel"
+version = "0.1.0"
+description = ""
+authors = ["Fabio Casanova <fabiojcp88@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+selenium = "^4.22.0"
+fitz = "^0.0.1.dev2"
+pytesseract = "^0.3.10"
+tqdm = "^4.66.4"
+pillow = "^10.3.0"
+sqlalchemy = "^2.0.31"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.4.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
