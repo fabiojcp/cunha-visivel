@@ -78,7 +78,7 @@ class CunhaScraper:
                     logger.info('Clicking "next" button in the webpage...')
                     next_button = driver.find_element(By.CSS_SELECTOR, "a.next")
                     # sleep for a random short time to avoid being blocked
-                    time.sleep(random.uniform(0.5, 1.5))
+                    time.sleep(random.uniform(0.2, 0.5))
                     next_button.click()
                 except NoSuchElementException:
                     logger.info("No more pages to scrape.")
