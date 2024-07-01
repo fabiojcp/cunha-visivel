@@ -47,9 +47,40 @@ Para instalar as dependências e configurar o ambiente, siga os passos abaixo:
 ## Como Usar
 
 - `cunha`: Comando CLI de scraper do site do diário oficial da cidade de Cunha/SP [link](https://www.imprensaoficialmunicipal.com.br/cunha)
-  - `nome_da_pasta` (obrigatório) para destino dos arquivos, exemplo: `cunha scrap` ou `cunha.workdir`, o sufixo `.workdir` será adicionado automaticamente caso não seja indicado
-  - `--at-most` (opcional): quantidade de páginas a serem lidas. Padrão 10 páginas
-  - `--headful` (opcional) opção de exibir o browser
+
+### Parâmetros obrigatórios:
+
+  - **`nome_da_pasta`** 
+    - **Tipo:** String
+    - **Descrição:** destino dos arquivos, exemplo: `cunha scrap` ou `cunha cunha.workdir`, o sufixo `.workdir` será adicionado automaticamente caso não seja indicado
+
+### Parâmetros opcionais:
+  - **`--at-most`**
+    - **Tipo:** Inteiro
+    - **Padrão:** 10
+    - **Descrição:** Define o número máximo de arquivos PDF a serem baixados durante a execução.
+
+  - **`--url`**
+    - **Tipo:** String
+    - **Padrão:** `"https://www.imprensaoficialmunicipal.com.br/cunha"`
+    - **Descrição:** Especifica a URL completa de onde os arquivos PDF serão raspados.
+    - **Exceção:** Não pode ser usado junto do parâmetro `--city`
+
+  - **`--city`**
+    - **Tipo:** String
+    - **Padrão:** `"cunha"`
+    - **Descrição:** Especifica o caminho da cidade na URL de onde os arquivos PDF serão raspados.
+    - **Exceção:** Não pode ser usado junto do parâmetro `--url`
+
+  - **`--href`**
+    - **Tipo:** String
+    - **Padrão:** `'a[href^="https://dosp.com.br/impressao.php?i="]'`
+    - **Descrição:** Selector CSS para identificar os botões que abrem os PDFs durante a raspagem.
+
+  - **`--next-btn`**
+    - **Tipo:** String
+    - **Padrão:** "a.next"
+    - **Descrição:** Selector CSS para identificar o botão de "próximo" que avança para a próxima página durante a raspagem.
   
 
 ## Dependências
