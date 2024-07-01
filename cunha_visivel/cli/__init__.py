@@ -37,6 +37,8 @@ def cunha_cli(headful: bool, workdir_path: Path, at_most: int):
             continue
 
         workdir_op.download_pdf(pdf_link)
+    
+    logger.success("Done!")
 
 
 if __name__ == "__main__":
