@@ -19,6 +19,8 @@ click = "^8.1.7"
 #    { include = "cunha_visivel", from = "." }
 #]
 loguru = "^0.7.2"
+requests = "^2.32.3"
+pydantic = "^2.7.4"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.4.2"
