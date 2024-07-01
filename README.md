@@ -1,6 +1,6 @@
 # Cunha Visível
 
-De uma maneira geral as informações do poder público devem ser transparentes e de fácil acesso. Visando a facilidade para o munícipe estou criando este projeto para transformar arquivos de pdf que contenha imagens, com foco em páginas escaneadas, para que possam ser indexadas/pesquisadas. 
+De uma maneira geral as informações do poder público devem ser transparentes e de fácil acesso. Visando a facilidade para o munícipe, este projeto transforma arquivos de pdf que contenha imagens, com foco em páginas escaneadas, para que possam ser indexadas/pesquisadas. 
 Este repositório utiliza Python e é gerenciado com Poetry.
 
 ## Instalação
