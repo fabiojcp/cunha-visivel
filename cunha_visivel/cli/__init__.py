@@ -1,14 +1,26 @@
+from pathlib import Path
 import click
+from loguru import logger
 
+from cunha_visivel.scraping import CunhaScraper
+from cunha_visivel.utils.folder import create_workdir_from_path
 
 
 # create a click cli command to download the pdfs
 @click.command()
 @click.option("--headful", is_flag=True, help="Run the browser in headful mode")
-def cunha_cli(headful: bool) -> None:
-    print("Fabão")
+# add folder argument
+@click.argument("workdir_path", type=click.Path())
+def cunha_cli(headful: bool, workdir_path: Path) -> None:
+    # Ensure the folder exists and ends with ".workdir"
+    workdir_path = Path(workdir_path).absolute()
+    workdir_path = create_workdir_from_path(workdir_path)
+
+    # Get all PDF links:
+    pdf_links = CunhaScraper(headful=headful).get_pdf_links()
+
     # chrome_options = webdriver.ChromeOptions()
-    
+
     # if not headful:
     #     chrome_options.add_argument("--headless")
 
@@ -45,4 +57,3 @@ def cunha_cli(headful: bool) -> None:
     #             break
     # finally:
     #     driver.quit()
-
