@@ -11,7 +11,7 @@ Responsabilidade em Python de realizar raspagem (scraping), baixar arquivos pdfs
 
 This Python script is responsible for performing web scraping, extracting data, download pdf's and generating the necessary data for the front-end.
 
-[Ver projeto / View project]('/scrap)
+[Ver projeto / View project](/scrap)
 
 
 ## Front
@@ -20,7 +20,7 @@ Este projeto utiliza Next.js para o desenvolvimento do front-end. Next.js é um 
 
 This project uses Next.js for frontend development. Next.js is a React framework that allows for the creation of fast and efficient web applications. With Next.js, it is possible to build interactive and responsive interfaces, as well as facilitate server-side rendering.
 
-[Ver projeto / View project]('/front')
+[Ver projeto / View project](/front)
 
 ## Contribuição
 
