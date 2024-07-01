@@ -12,7 +12,6 @@ fitz = "^0.0.1.dev2"
 pytesseract = "^0.3.10"
 tqdm = "^4.66.4"
 pillow = "^10.3.0"
-sqlalchemy = "^2.0.31"
 click = "^8.1.7"
 
 #packages = [
