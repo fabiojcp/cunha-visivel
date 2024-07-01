@@ -15,13 +15,23 @@ class CunhaScraper:
 
     def __init__(
         self,
+        imprensa_oficial_url: str = "https://www.imprensaoficialmunicipal.com.br/",
         cunha_imprensa_oficial_url: str = "https://www.imprensaoficialmunicipal.com.br/cunha",
         pdf_links_css_selector: str = 'a[href^="https://dosp.com.br/impressao.php?i="]',
         headful: bool = False,
+        city: str = "cunha",
+        url: str = "https://www.imprensaoficialmunicipal.com.br/cunha",
+        href: str = 'a[href^="https://dosp.com.br/impressao.php?i="]',
+        next_btn: str = "a.next",
     ):
+        self.imprensa_oficial_url = imprensa_oficial_url
         self.cunha_imprensa_oficial_url = cunha_imprensa_oficial_url
         self.pdf_links_css_selector = pdf_links_css_selector
         self.headful = headful
+        self.city = city
+        self.url = url
+        self.href = href
+        self.next_btn = next_btn
 
     def get_pdf_links(self, at_most: int = 0) -> list[str]:
         """
@@ -53,6 +63,15 @@ class CunhaScraper:
 
         pdf_links = []
 
+        if self.city != "cunha" and self.url == self.imprensa_oficial_url:
+            self.cunha_imprensa_oficial_url = f"{self.imprensa_oficial_url}/{self.city}"
+
+        if self.url != self.cunha_imprensa_oficial_url:
+            self.cunha_imprensa_oficial_url = self.url
+
+        if self.href != self.pdf_links_css_selector:
+            self.pdf_links_css_selector = self.href
+
         try:
             logger.info(f'Opening URL "{self.cunha_imprensa_oficial_url}"...')
             driver.get(self.cunha_imprensa_oficial_url)
@@ -76,7 +95,7 @@ class CunhaScraper:
                     break
                 try:
                     logger.info('Clicking "next" button in the webpage...')
-                    next_button = driver.find_element(By.CSS_SELECTOR, "a.next")
+                    next_button = driver.find_element(By.CSS_SELECTOR, self.next_btn)
                     # sleep for a random short time to avoid being blocked
                     time.sleep(random.uniform(0.2, 0.5))
                     next_button.click()
