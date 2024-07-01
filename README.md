@@ -81,6 +81,11 @@ Para instalar as dependências e configurar o ambiente, siga os passos abaixo:
     - **Tipo:** String
     - **Padrão:** "a.next"
     - **Descrição:** Selector CSS para identificar o botão de "próximo" que avança para a próxima página durante a raspagem.
+
+  - **`--count-existing`**
+    - **Tipo:** Flag
+    - **Descrição:** Se habilitado, ignora o download de PDFs que já existem no destino na contagem de máximo de arquivos em `--at-most`.
+
   
 
 ## Dependências

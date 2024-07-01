@@ -9,6 +9,7 @@
     "numpy",
     "pdfs",
     "prefs",
+    "pydantic",
     "pytz",
     "urllib",
     "visivel"

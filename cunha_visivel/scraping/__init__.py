@@ -6,6 +6,9 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.service import Service
+from pathlib import Path
+
+from cunha_visivel.workdir.structs import CunhaVisivelDB
 
 
 class CunhaScraper:
@@ -15,6 +18,7 @@ class CunhaScraper:
 
     def __init__(
         self,
+        workdir_op: Path,
         imprensa_oficial_url: str = "https://www.imprensaoficialmunicipal.com.br/",
         cunha_imprensa_oficial_url: str = "https://www.imprensaoficialmunicipal.com.br/cunha",
         pdf_links_css_selector: str = 'a[href^="https://dosp.com.br/impressao.php?i="]',
@@ -23,7 +27,8 @@ class CunhaScraper:
         url: str = "https://www.imprensaoficialmunicipal.com.br/cunha",
         href: str = 'a[href^="https://dosp.com.br/impressao.php?i="]',
         next_btn: str = "a.next",
-    ):
+        count_existing: bool = False,
+    ) -> list[str]:
         self.imprensa_oficial_url = imprensa_oficial_url
         self.cunha_imprensa_oficial_url = cunha_imprensa_oficial_url
         self.pdf_links_css_selector = pdf_links_css_selector
@@ -32,12 +37,16 @@ class CunhaScraper:
         self.url = url
         self.href = href
         self.next_btn = next_btn
+        self.workdir_op = workdir_op
+        self.count_existing = count_existing
+
+    def __contains__(self, url: str):
+        return url in self.db.pdf_links
 
     def get_pdf_links(self, at_most: int = 0) -> list[str]:
         """
         Get all PDF download links from the Cunha Imprensa Oficial website.
         """
-
         chrome_options = webdriver.ChromeOptions()
 
         if not self.headful:
@@ -87,10 +96,18 @@ class CunhaScraper:
                     pdf_url = link.get_attribute("href")
                     if not pdf_url in pdf_links:
                         logger.info(f"Adding PDF link: {pdf_url}")
+
+                        # Check if the PDF already exists in the workdir
+                        if pdf_url in self.workdir_op and not self.count_existing:
+                            logger.warning(f"PDF {pdf_url} exists in the workdir, skipping...")
+                            continue
+
                         pdf_links.append(pdf_url)
+
                         if at_most > 0 and len(pdf_links) >= at_most:
-                            logger.info(f"Reached the limit of {at_most} PDF links.")
+                            logger.warning(f"Reached the limit of {at_most} PDF links.")
                             break
+                # TODO: remove
                 if at_most > 0 and len(pdf_links) >= at_most:
                     break
                 try:

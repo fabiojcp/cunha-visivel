@@ -40,10 +40,21 @@ from cunha_visivel.workdir.operator import WorkdirOperator
     default='a[href^="https://dosp.com.br/impressao.php?i="]',
     help="href button open pdf selector",
 )
-@click.option("--next-btn", type=str, default="a.next", help="next button selector")
+@click.option(
+    "--next-btn",
+    type=str,
+    default="a.next",
+    help="next button selector"
+)
+@click.option(
+    "--count-existing",
+    is_flag=True,
+    help="Skip downloading existing PDFs",
+)
 
 # add folder argument
 @click.argument("workdir_path", type=click.Path())
+
 def cunha_cli(
     headful: bool,
     workdir_path: Path,
@@ -52,8 +63,11 @@ def cunha_cli(
     url: str,
     href: str,
     next_btn: str,
+    count_existing: bool,
 ):
+    # Ensure that only one of city or url is used
     exclusive_city_or_url(city, url)
+
     # Ensure the folder exists and ends with ".workdir"
     workdir_path = Path(workdir_path).absolute()
     if ".workdir" not in workdir_path.suffix:
@@ -67,7 +81,13 @@ def cunha_cli(
 
     # Get all PDF links:
     pdf_links = CunhaScraper(
-        headful=headful, city=city, url=url, href=href, next_btn=next_btn
+        headful=headful,
+        city=city,
+        url=url,
+        href=href,
+        next_btn=next_btn,
+        workdir_op=workdir_op,
+        count_existing=count_existing,
     ).get_pdf_links(at_most=at_most)
 
     for pdf_link in pdf_links:
