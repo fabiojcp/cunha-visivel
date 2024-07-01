@@ -1,10 +1,17 @@
 {
   "cSpell.words": [
+    "certifi",
     "crdownload",
+    "dateutil",
     "headful",
+    "idna",
     "impressao",
+    "numpy",
     "pdfs",
     "prefs",
+    "pydantic",
+    "pytz",
+    "urllib",
     "visivel"
   ]
 }
