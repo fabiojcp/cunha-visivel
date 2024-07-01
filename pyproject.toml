@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "cunha-visivel"
+name = "cunha_visivel"
 version = "0.1.0"
 description = ""
 authors = ["Fabio Casanova <fabiojcp88@gmail.com>"]
@@ -12,8 +12,14 @@ fitz = "^0.0.1.dev2"
 pytesseract = "^0.3.10"
 tqdm = "^4.66.4"
 pillow = "^10.3.0"
-sqlalchemy = "^2.0.31"
+click = "^8.1.7"
 
+#packages = [
+#    { include = "cunha_visivel", from = "." }
+#]
+loguru = "^0.7.2"
+requests = "^2.32.3"
+pydantic = "^2.7.4"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.4.2"
@@ -21,3 +27,9 @@ black = "^24.4.2"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+# Create an entrypoint for cunha_cli contained in the module cunha_visivel.cli
+[tool.poetry.scripts]
+cunha = "cunha_visivel.cli:cunha_cli"
+
+
