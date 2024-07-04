@@ -4,6 +4,9 @@ version = "0.1.0"
 description = ""
 authors = ["Fabio Casanova <fabiojcp88@gmail.com>"]
 readme = "README.md"
+packages = [
+    { include = "cunha_visivel", from = "." }
+]
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -14,13 +17,13 @@ tqdm = "^4.66.4"
 pillow = "^10.3.0"
 click = "^8.1.7"
 
-#packages = [
-#    { include = "cunha_visivel", from = "." }
-#]
 loguru = "^0.7.2"
 requests = "^2.32.3"
 pydantic = "^2.7.4"
 
+pypdf2 = "^3.0.1"
+pdf2image = "^1.17.0"
+tesseract = "^0.1.3"
 [tool.poetry.group.dev.dependencies]
 black = "^24.4.2"
 
@@ -30,6 +33,7 @@ build-backend = "poetry.core.masonry.api"
 
 # Create an entrypoint for cunha_cli contained in the module cunha_visivel.cli
 [tool.poetry.scripts]
-cunha = "cunha_visivel.cli:cunha_cli"
+scrap = "cunha_visivel.cli:cunha_cli"
+extract = "cunha_visivel.cli.extract_cli:extract_cli"
 
 

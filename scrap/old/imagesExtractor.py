@@ -11,7 +11,7 @@ pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
 
 FILE_PATH = Path(__file__).resolve().parent
 
-TESSDATA_PATH = FILE_PATH / "assets" / "tessdata"
+TESSDATA_PATH = FILE_PATH / "tessdata"
 
 workdir = "./assets/pdf"
 output_dir = "./assets/txt/"

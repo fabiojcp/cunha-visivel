@@ -99,7 +99,9 @@ class CunhaScraper:
 
                         # Check if the PDF already exists in the workdir
                         if pdf_url in self.workdir_op and not self.count_existing:
-                            logger.warning(f"PDF {pdf_url} exists in the workdir, skipping...")
+                            logger.warning(
+                                f"PDF {pdf_url} exists in the workdir, skipping..."
+                            )
                             continue
 
                         pdf_links.append(pdf_url)

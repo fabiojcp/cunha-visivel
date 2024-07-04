@@ -40,12 +40,7 @@ from cunha_visivel.workdir.operator import WorkdirOperator
     default='a[href^="https://dosp.com.br/impressao.php?i="]',
     help="href button open pdf selector",
 )
-@click.option(
-    "--next-btn",
-    type=str,
-    default="a.next",
-    help="next button selector"
-)
+@click.option("--next-btn", type=str, default="a.next", help="next button selector")
 @click.option(
     "--count-existing",
     is_flag=True,
@@ -54,7 +49,6 @@ from cunha_visivel.workdir.operator import WorkdirOperator
 
 # add folder argument
 @click.argument("workdir_path", type=click.Path())
-
 def cunha_cli(
     headful: bool,
     workdir_path: Path,
