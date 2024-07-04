@@ -1,7 +1,7 @@
 */.vscode
 *.pdf
 
-*.workdir
+*.png
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
