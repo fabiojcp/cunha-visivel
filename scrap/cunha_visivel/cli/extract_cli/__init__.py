@@ -3,7 +3,6 @@ import shlex
 import json
 import PyPDF2
 import pytesseract
-import io
 import click
 import shutil
 from pathlib import Path
@@ -25,25 +24,43 @@ pytesseract.pytesseract.tesseract_cmd = shutil.which("tesseract")
 
 
 def get_tessdata_path():
-    """Obtém o caminho do diretório tessdata."""
+    # Obtém o caminho do diretório tessdata.
     return Path().resolve() / "tessdata"
 
 
 def extract_text_from_image(image, config_flags):
-    """Extrai texto de uma imagem usando OCR."""
+    # Extrai texto de uma imagem usando OCR.
     return pytesseract.image_to_string(image, lang="por", config=config_flags)
 
 
-def process_pdf(pdf_path, images_dir, config_flags):
-    """Processa um arquivo PDF e extrai texto."""
+def process_pdf(pdf_path, images_dir, config_flags, db: CunhaVisivelDB):
+    # Processa um arquivo PDF e extrai texto.
     pdf_name = os.path.basename(pdf_path)
     pages_text = []
 
     with open(pdf_path, "rb") as f:
         reader = PyPDF2.PdfReader(f)
+        total_pages = len(reader.pages)
+
+        # Verifica se todas as páginas já foram processadas
+        all_pages_processed = db.page_exists(pdf_path, total_pages)
+        if all_pages_processed:
+            logger.info(f"All pages of {pdf_name} already processed, skipping...")
+            return pages_text
+
+    logger.info(f"Processing {pdf_name}...")
+
+    with open(pdf_path, "rb") as f:
+        reader = PyPDF2.PdfReader(f)
         for page_num in tqdm(
-            range(len(reader.pages)), desc=f"Extracting text from {pdf_name}"
+            range(total_pages), desc=f"Extracting text from {pdf_name}"
         ):
+            if db.page_exists(pdf_path, page_num + 1):
+                logger.info(
+                    f"Page {page_num + 1} of {pdf_name} already processed, skipping..."
+                )
+                continue
+
             page = reader.pages[page_num]
             text = page.extract_text()
 
@@ -63,25 +80,22 @@ def process_pdf(pdf_path, images_dir, config_flags):
     return pages_text
 
 
-def update_json(json_path: Path, pdf_path: Path, pages_text: str) -> None:
-    db = CunhaVisivelDB.model_validate_json(json_path.read_text())
-    
+def update_json(
+    json_path: Path, pdf_path: Path, pages_text: str, db: CunhaVisivelDB
+) -> None:
     pdf_name = os.path.basename(pdf_path)
     for page in pages_text:
-        # print('-------------page----------------')
-        # print(page)
-        # print("\n")
-        # print('\n')
         try_add_page = CunhaVisivelDB.try_add_page(db, pdf_name, page)
         if try_add_page:
             logger.info(f"Added page {pdf_name} to the database.")
             json_path.write_text(db.model_dump_json(indent=2))
             continue
         if try_add_page is None:
-            logger.warning(f"Page {pdf_name} already exists in the database, skipping...")
+            logger.warning(
+                f"Page {pdf_name} already exists in the database, skipping..."
+            )
             continue
         logger.error(f"Failed to add page {pdf_name} to the database.")
-
 
 
 @click.command()
@@ -92,10 +106,14 @@ def update_json(json_path: Path, pdf_path: Path, pages_text: str) -> None:
     type=int,
     help="Limita a quantidade de arquivos a serem processados.",
 )
-def extract_cli(workdir, limit):
+@click.option(
+    "--empty_pages",
+    is_flag=True,
+    help="Log URLs of PDF links that do not have any pages.",
+)
+def extract_cli(workdir: str, limit: int | None, empty_pages: bool) -> None:
     # Extrai texto de arquivos PDF em um diretório.
     workdir_path = Path(workdir).absolute()
-    logger.info(f"Extracting text from PDFs in {workdir_path.suffix}...")
 
     if ".workdir" not in workdir_path.suffix:
         workdir_path = Path(str(workdir_path) + ".workdir").absolute()
@@ -108,24 +126,42 @@ def extract_cli(workdir, limit):
     images_dir = workdir_path / "images"
     json_path = workdir_path / "db.json"
 
+    db = CunhaVisivelDB.model_validate_json(json_path.read_text())
+
+    if empty_pages:
+        empty_urls = db.log_empty_pages()
+
+        if empty_urls:
+            for url in empty_urls:
+                logger.info(f"PDF link {url} não possui páginas.")
+            logger.info(f"Um total de {len(empty_urls)} PDFs não possuem páginas.")
+        else:
+            logger.success("Todos os PDFs possuem páginas.")
+
+        return
+
     if not images_dir.exists():
         os.makedirs(images_dir)
+
+    logger.info(f"Extracting text from PDFs in {workdir_path.suffix}...")
 
     tessdata_path = get_tessdata_path()
     config_flags = rf"--tessdata-dir {shlex.quote(str(tessdata_path))}"
 
     reached_limit = 0
+    count = 0
     for each_path in os.listdir(pdf_dir):
         if each_path.endswith(".pdf"):
             if reached_limit == limit:
                 break
             pdf_path = pdf_dir / each_path
-            pages_text = process_pdf(pdf_path, images_dir, config_flags)
-            update_json(json_path, str(pdf_path), pages_text)
+            pages_text = process_pdf(pdf_path, images_dir, config_flags, db)
+            update_json(json_path, str(pdf_path), pages_text, db)
             reached_limit += 1
+            count += 1
 
     shutil.rmtree(images_dir)
-    logger.success("Done!")
+    logger.success(f"Total of {count} processed. Done!")
 
 
 if __name__ == "__main__":

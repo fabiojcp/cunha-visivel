@@ -50,14 +50,15 @@ Para instalar as dependências e configurar o ambiente, siga os passos abaixo:
     Para mais informações, visite o repositório pyenv no [GitHub](https://github.com/pyenv/pyenv).
 
 ## Como Usar
-
-- `cunha`: Comando CLI de scraper do site do diário oficial da cidade de Cunha/SP [link](https://www.imprensaoficialmunicipal.com.br/cunha)
+- Usando o comando `scrap`:
+  
+  `scrap`: Comando CLI de scraper do site do diário oficial da cidade de Cunha/SP [link](https://www.imprensaoficialmunicipal.com.br/cunha) ou outros subdomínios similares do mesmo site
 
 ### Parâmetros obrigatórios:
 
-  - **`nome_da_pasta`** 
+  - **`workdir`** 
     - **Tipo:** String
-    - **Descrição:** destino dos arquivos, exemplo: `cunha scrap` ou `cunha cunha.workdir`, o sufixo `.workdir` será adicionado automaticamente caso não seja indicado
+    - **Descrição:** destino dos arquivos, exemplo: `scrap cunha` ou `scrap cunha.workdir`, o sufixo `.workdir` será adicionado automaticamente caso não seja indicado
 
 ### Parâmetros opcionais:
   - **`--at-most`**
@@ -92,7 +93,24 @@ Para instalar as dependências e configurar o ambiente, siga os passos abaixo:
     - **Descrição:** Se habilitado, ignora o download de PDFs que já existem no destino na contagem de máximo de arquivos em `--at-most`.
 
   
+- Usando o `extract`:
 
+  O comando `extract` permite extrair texto de arquivos PDF em um diretório específico. Ele possui algumas opções que podem ser usadas para modificar seu comportamento.
+
+#### Parâmetros obrigatórios:
+
+  - **`workdir`** 
+    - **Tipo:** Caminho
+    - **Descrição:** Diretório de trabalho onde os arquivos PDF estão localizados.
+
+#### Parâmetros opcionais:
+  - **`--limit`**
+    - **Tipo:** Inteiro
+    - **Descrição:** Limita a quantidade de arquivos a serem processados.
+
+  - **`--empty_pages`**
+    - **Tipo:** Flag
+    - **Descrição:** Log URLs de links de PDF que não possuem páginas.
 ## Dependências
 
 - **certifi**: 2023.5.7

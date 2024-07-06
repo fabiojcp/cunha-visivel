@@ -43,6 +43,7 @@ class WorkdirOperator:
         pdf_info = PDFInformation(
             hash_sha512=hashlib.sha512(pdf_response.content).hexdigest(),
             path=pdf_path.relative_to(self.workdir_path),
+            pages=[],
         )
 
         added = self.db.try_add_pdf_link(url, pdf_info)
