@@ -108,7 +108,7 @@ Para instalar as dependências e configurar o ambiente, siga os passos abaixo:
     - **Tipo:** Inteiro
     - **Descrição:** Limita a quantidade de arquivos a serem processados.
 
-  - **`--empty_pages`**
+  - **`--empty-pages`**
     - **Tipo:** Flag
     - **Descrição:** Log URLs de links de PDF que não possuem páginas.
 ## Dependências

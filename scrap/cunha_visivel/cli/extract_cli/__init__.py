@@ -13,28 +13,26 @@ from loguru import logger
 
 from cunha_visivel.workdir.structs import CunhaVisivelDB
 
-# Verifica se o Tesseract está instalado e define o caminho
+# Verifies if Tesseract is installed and sets the path
 if shutil.which("tesseract") is None:
-    raise EnvironmentError(
-        "Tesseract OCR não está instalado ou não está no PATH do sistema."
-    )
+    raise EnvironmentError("Tesseract OCR is not installed or not in the system PATH.")
 
-# Configuração do Tesseract
+# Tesseract configuration
 pytesseract.pytesseract.tesseract_cmd = shutil.which("tesseract")
 
 
 def get_tessdata_path():
-    # Obtém o caminho do diretório tessdata.
+    # Gets the path to the tessdata directory.
     return Path().resolve() / "tessdata"
 
 
 def extract_text_from_image(image, config_flags):
-    # Extrai texto de uma imagem usando OCR.
+    # Extracts text from an image using OCR.
     return pytesseract.image_to_string(image, lang="por", config=config_flags)
 
 
 def process_pdf(pdf_path, images_dir, config_flags, db: CunhaVisivelDB):
-    # Processa um arquivo PDF e extrai texto.
+    # Processes a PDF file and extracts text.
     pdf_name = os.path.basename(pdf_path)
     pages_text = []
 
@@ -42,7 +40,7 @@ def process_pdf(pdf_path, images_dir, config_flags, db: CunhaVisivelDB):
         reader = PyPDF2.PdfReader(f)
         total_pages = len(reader.pages)
 
-        # Verifica se todas as páginas já foram processadas
+        # Checks if all pages have already been processed
         all_pages_processed = db.page_exists(pdf_path, total_pages)
         if all_pages_processed:
             logger.info(f"All pages of {pdf_name} already processed, skipping...")
@@ -64,7 +62,7 @@ def process_pdf(pdf_path, images_dir, config_flags, db: CunhaVisivelDB):
             page = reader.pages[page_num]
             text = page.extract_text()
 
-            # Converte a página do PDF para imagem
+            # Converts the PDF page to an image
             images = convert_from_path(
                 pdf_path, first_page=page_num + 1, last_page=page_num + 1
             )
@@ -104,15 +102,15 @@ def update_json(
     "--limit",
     default=None,
     type=int,
-    help="Limita a quantidade de arquivos a serem processados.",
+    help="Limits the number of files to be processed.",
 )
 @click.option(
-    "--empty_pages",
+    "--empty-pages",
     is_flag=True,
     help="Log URLs of PDF links that do not have any pages.",
 )
 def extract_cli(workdir: str, limit: int | None, empty_pages: bool) -> None:
-    # Extrai texto de arquivos PDF em um diretório.
+    # Extracts text from PDF files in a directory.
     workdir_path = Path(workdir).absolute()
 
     if ".workdir" not in workdir_path.suffix:
@@ -133,10 +131,10 @@ def extract_cli(workdir: str, limit: int | None, empty_pages: bool) -> None:
 
         if empty_urls:
             for url in empty_urls:
-                logger.info(f"PDF link {url} não possui páginas.")
-            logger.info(f"Um total de {len(empty_urls)} PDFs não possuem páginas.")
+                logger.info(f"PDF link {url} has no pages.")
+            logger.info(f"A total of {len(empty_urls)} PDFs have no pages.")
         else:
-            logger.success("Todos os PDFs possuem páginas.")
+            logger.success("All PDFs have pages.")
 
         return
 

@@ -1,7 +1,6 @@
 from datetime import datetime
 import os
 from pathlib import Path
-from typing import List
 from pydantic import BaseModel, Field
 
 
@@ -54,7 +53,7 @@ class CunhaVisivelDB(BaseModel):
                 return True
         return False
 
-    def log_empty_pages(self) -> List[URL]:
+    def log_empty_pages(self) -> list[URL]:
         urls = []
         for diario in self.pdf_links.values():
 
