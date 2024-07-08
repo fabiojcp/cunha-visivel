@@ -1,33 +1,3 @@
 {
-  "extends": "next/core-web-vitals",
-  "plugins": ["import"],
-  "rules": {
-    "import/order": [
-      "error",
-      {
-        "groups": [
-          "builtin",
-          "external",
-          "internal",
-          "parent",
-          "sibling",
-          "index",
-          "type"
-        ],
-        "pathGroups": [
-          {
-            "pattern": "**/*.css",
-            "group": "index",
-            "position": "after"
-          }
-        ],
-        "pathGroupsExcludedImportTypes": ["builtin"],
-        "newlines-between": "always",
-        "alphabetize": {
-          "order": "asc",
-          "caseInsensitive": true
-        }
-      }
-    ]
-  }
+  "extends": "next/core-web-vitals"
 }
