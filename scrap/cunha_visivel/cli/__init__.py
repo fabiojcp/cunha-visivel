@@ -85,11 +85,12 @@ def cunha_cli(
     ).get_pdf_links(at_most=at_most)
 
     for pdf_link in pdf_links:
-        if pdf_link in workdir_op:
-            logger.warning(f"PDF {pdf_link} exists in the workdir, skipping...")
-            continue
+        for url, details in pdf_link.items():
+            if url in workdir_op:
+                logger.warning(f"PDF {pdf_link} exists in the workdir, skipping...")
+                continue
 
-        workdir_op.download_pdf(pdf_link)
+            workdir_op.download_pdf(url, details)
 
     logger.success("Done!")
 

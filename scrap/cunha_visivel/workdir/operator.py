@@ -29,7 +29,7 @@ class WorkdirOperator:
     def __contains__(self, url: str):
         return url in self.db.pdf_links
 
-    def download_pdf(self, url: str) -> None:
+    def download_pdf(self, url: str, details: dict) -> None:
         logger.info(f"Downloading PDF from {url}...")
         pdf_response = requests.get(url)
         logger.info(f"Downloaded PDF from {url}.")
@@ -44,6 +44,10 @@ class WorkdirOperator:
             hash_sha512=hashlib.sha512(pdf_response.content).hexdigest(),
             path=pdf_path.relative_to(self.workdir_path),
             pages=[],
+            name=details["name"],
+            date=details["date"],
+            year=details["year"],
+            edition=details["edition"],
         )
 
         added = self.db.try_add_pdf_link(url, pdf_info)

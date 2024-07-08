@@ -16,6 +16,10 @@ class PDFInformation(BaseModel):
     hash_sha512: str
     path: Path
     pages: list[PDFPage]
+    name: str
+    date: str
+    year: str
+    edition: str
 
 
 class CunhaVisivelDB(BaseModel):
