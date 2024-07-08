@@ -2,7 +2,7 @@
 
 import { useRouter as useRouterNavigation } from "next/navigation";
 import { useRouter } from "next/router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 
 import RootLayout from "@/components/layout";
 import SearchResultItem from "@/components/search-result-item";
@@ -11,7 +11,7 @@ import SkeletonLoader from "@/components/skeleton-search-result";
 
 const fetchSearchResults = async (
   query: string,
-  page: number,
+  page: string | string[] | 1,
   s: string | string[] | undefined,
   r: string | string[] | undefined,
   d: string | string[] | undefined
@@ -45,10 +45,10 @@ const SearchPage: React.FC = () => {
         setLoading(true);
         const data = await fetchSearchResults(
           q as string,
-          parseInt(page as string) || currentPage,
-          s,
-          r,
-          d
+          page || 1,
+          s || "DESC",
+          r || '100',
+          d || 't'
         );
         setResults(data.results);
         setTotal(data.total);
@@ -58,45 +58,39 @@ const SearchPage: React.FC = () => {
           router.replace(`/search?q=${q}&s=${s}&r=${r}&d=${d}&page=${1}`);
           return;
         }
-        setCurrentPage(data.page);
+        setCurrentPage(data.currentPage);
         setLoading(false);
       }
       console.log("load");
     };
 
     fetchResults();
-  }, [q, currentPage, r, d, s, page, routerNavigation, router]);
-
-  const handlePageChange = async (newPage: number) => {
-    setCurrentPage(newPage);
-    setLoading(true);
-    const data = await fetchSearchResults(q as string, currentPage, s, r, d);
-    setResults(data.results);
-    setLoading(false);
-  };
+  }, [q, currentPage, r, d, s, page]);
 
   return (
-    <RootLayout>
-      <main className="bg-white w-full h-full min-h-screen max-h-screen overflow-hidden flex flex-col">
-        {loading ? (
-          <SkeletonLoader />
-        ) : (
-          <>
-            <SearchTop
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalResults={total}
-            />
-            <section className="pl-12 py-4 flex flex-col gap-2 overflow-y-scroll">
-              {Array.isArray(results) &&
-                results.map((result, index) => (
-                  <SearchResultItem key={index} result={result} />
-                ))}
-            </section>
-          </>
-        )}
-      </main>
-    </RootLayout>
+    <Suspense fallback={<SkeletonLoader />}>
+      <RootLayout>
+        <main className="bg-white w-full h-full min-h-screen max-h-screen overflow-hidden flex flex-col">
+          {loading ? (
+            <SkeletonLoader />
+          ) : (
+            <>
+              <SearchTop
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalResults={total}
+              />
+              <section className="pl-12 py-4 flex flex-col gap-2 overflow-y-scroll">
+                {Array.isArray(results) &&
+                  results.map((result, index) => (
+                    <SearchResultItem key={index} result={result} />
+                  ))}
+              </section>
+            </>
+          )}
+        </main>
+      </RootLayout>
+    </Suspense>
   );
 };
 

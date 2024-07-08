@@ -1,4 +1,5 @@
 import { Inter } from "next/font/google";
+import { Analytics } from '@vercel/analytics/react';
 
 import type { Metadata } from "next";
 import "@/styles/globals.css";
@@ -39,6 +40,7 @@ export default function RootLayout({
       />
       <body className={`${inter.className} w-full min-h-screen flex flex-col`}>
         {children}
+        <Analytics />
       </body>
     </html>
   );
