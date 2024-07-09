@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url = "mysql://root:2209@localhost:3306/cunhavisivelATUALIZAR "
+  shadowDatabaseUrl = "mysql://root:2209@localhost:3306/cunhavisivel"
+}
+
+model Metadata {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  pdfLinks  PdfLink[]
+}
+
+model PdfLink {
+  id         Int      @id @default(autoincrement())
+  url        String   @unique
+  hashSha512 String
+  path       String
+  metadataId Int
+  metadata   Metadata @relation(fields: [metadataId], references: [id])
+  pages      Page[]
+  name      String?
+  date      String?
+  year      String?
+  edition   String?
+}
+
+model Page {
+  id        Int      @id @default(autoincrement())
+  number    Int
+  text      String @db.LongText
+  pdfLinkId Int
+  pdfLink   PdfLink  @relation(fields: [pdfLinkId], references: [id])
+}
