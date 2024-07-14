@@ -7,31 +7,53 @@ datasource db {
   url = env("DATABASE_URL")
 }
 
-model Metadata {
-  id        Int       @id @default(autoincrement())
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  pdfLinks  PdfLink[]
-}
-
 model PdfLink {
-  id         Int      @id @default(autoincrement())
+  id        String   @id @default(uuid())
   url        String   @unique
   hashSha512 String
   path       String
-  metadataId Int
-  metadata   Metadata @relation(fields: [metadataId], references: [id])
   pages      Page[]
   name      String?
   date      String?
   year      String?
   edition   String?
+  invertedIndexes PdfLinkInvertedIndex[]
 }
 
 model Page {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(uuid())
   number    Int
   text      String @db.LongText
-  pdfLinkId Int
+  pdfLinkId String
   pdfLink   PdfLink  @relation(fields: [pdfLinkId], references: [id])
+  invertedIndexes PageInvertedIndex[]
+}
+
+model InvertedIndex {
+  id        String   @id @default(uuid())
+  word      String   @unique
+  pdfLinks  PdfLinkInvertedIndex[]
+  pages     PageInvertedIndex[]
+
+  @@index([word])
+}
+
+model PdfLinkInvertedIndex {
+  pdfLinkId        String
+  invertedIndexId  String
+
+  pdfLink          PdfLink         @relation(fields: [pdfLinkId], references: [id])
+  invertedIndex    InvertedIndex   @relation(fields: [invertedIndexId], references: [id])
+
+  @@id([pdfLinkId, invertedIndexId])
+}
+
+model PageInvertedIndex {
+  pageId           String
+  invertedIndexId  String
+
+  page             Page            @relation(fields: [pageId], references: [id])
+  invertedIndex    InvertedIndex   @relation(fields: [invertedIndexId], references: [id])
+
+  @@id([pageId, invertedIndexId])
 }
