@@ -42,12 +42,15 @@ class CunhaScraper:
 
     def __contains__(self, url: str):
         return url in self.db.pdf_links
-    
+
     def extract_edition_text(self, driver, parent):
-            try:
-                edition_element = parent.find_element(By.XPATH, ".//p[b[contains(text(),'Edição:')]]")
-                # Use JavaScript to get the text content excluding child elements
-                edition_text = driver.execute_script("""
+        try:
+            edition_element = parent.find_element(
+                By.XPATH, ".//p[b[contains(text(),'Edição:')]]"
+            )
+            # Use JavaScript to get the text content excluding child elements
+            edition_text = driver.execute_script(
+                """
                     var element = arguments[0];
                     var childNodes = element.childNodes;
                     var text = '';
@@ -57,11 +60,13 @@ class CunhaScraper:
                         }
                     }
                     return text;
-                """, edition_element)
-                return edition_text.replace('Edição:', '').strip()
-            except NoSuchElementException:
-                logger.warning("Element Edição not found.")
-                return ""
+                """,
+                edition_element,
+            )
+            return edition_text.replace("Edição:", "").strip()
+        except NoSuchElementException:
+            logger.warning("Element Edição not found.")
+            return ""
 
     def get_pdf_links(self, at_most: int = 0) -> list[dict]:
         """
@@ -117,11 +122,14 @@ class CunhaScraper:
 
                     parent = link.find_element(By.XPATH, "..")
                     name = parent.find_element(By.TAG_NAME, "h3").text
-                    date = parent.find_element(By.XPATH, ".//p[b[contains(text(),'Data:')]]").text.replace('Data: ', '')
-                    year = parent.find_element(By.XPATH, ".//p[b[contains(text(),'Ano:')]]").text.replace('Ano: ', '')
+                    date = parent.find_element(
+                        By.XPATH, ".//p[b[contains(text(),'Data:')]]"
+                    ).text.replace("Data: ", "")
+                    year = parent.find_element(
+                        By.XPATH, ".//p[b[contains(text(),'Ano:')]]"
+                    ).text.replace("Ano: ", "")
                     edition = self.extract_edition_text(driver, parent)
                     # edition = parent.find_element(By.XPATH, ".//p[b[contains(text(),'Edição:')]]").text.replace('Edição: ', '')
-
 
                     if not pdf_url in pdf_links:
                         logger.info(f"Adding PDF link: {pdf_url}")
@@ -131,7 +139,7 @@ class CunhaScraper:
                                 "name": name,
                                 "date": date,
                                 "year": year,
-                                "edition": edition
+                                "edition": edition,
                             }
                         }
 

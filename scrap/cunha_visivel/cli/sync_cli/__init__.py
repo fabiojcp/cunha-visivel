@@ -9,10 +9,12 @@ from cunha_visivel.workdir.operator import WorkdirOperator
 from cunha_visivel.workdir.structs import CunhaVisivelDB
 from cunha_visivel.workdir.structs_mysql import RelationalDB
 
+
 @click.command()
 @click.argument("workdir", type=click.Path(), required=False)
-@click.option("--invert", is_flag=True, help="Generate inverted index from Pages table in MySQL.")
-
+@click.option(
+    "--invert", is_flag=True, help="Generate inverted index from Pages table in MySQL."
+)
 def sync_cli(workdir: str, invert: bool) -> None:
     # Conectar ao banco de dados MySQL
     db = RelationalDB()
@@ -32,7 +34,7 @@ def sync_cli(workdir: str, invert: bool) -> None:
 
     if ".workdir" not in workdir_path.suffix:
         workdir_path = Path(str(workdir_path) + ".workdir").absolute()
-    
+
     if not workdir_path.exists():
         logger.error(f"Directory {workdir_path} does not exist.")
         return
@@ -42,7 +44,7 @@ def sync_cli(workdir: str, invert: bool) -> None:
     if not json_path.exists():
         logger.error(f"File {json_path} does not exist.")
         return
-    
+
     # Carregar o banco de dados JSON
     cunha_db = CunhaVisivelDB.model_validate_json(json_path.read_text())
 
@@ -59,6 +61,7 @@ def sync_cli(workdir: str, invert: bool) -> None:
             logger.info(f"PDF {url} already exists in the database, skipping.")
 
     logger.success("Database synchronization complete!")
+
 
 if __name__ == "__main__":
     sync_cli()

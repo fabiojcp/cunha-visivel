@@ -3,15 +3,17 @@ import json
 import os
 import re
 import time
-from loguru import logger
-import mysql.connector
-from mysql.connector import errorcode
-from pydantic import BaseModel
+from loguru import logger # type: ignore
+import mysql.connector # type: ignore
+from mysql.connector import errorcode # type: ignore
+from pydantic import BaseModel # type: ignore
 import uuid
+
 
 class PDFPage(BaseModel):
     number: int
     text: str
+
 
 class PDFInformation(BaseModel):
     hash_sha512: str
@@ -22,18 +24,19 @@ class PDFInformation(BaseModel):
     year: str
     edition: str
 
+
 class RelationalDB:
     def __init__(self):
         self._connect()
-    
+
     def _connect(self):
         try:
             self.conn = mysql.connector.connect(
-                user=os.getenv('MYSQL_USER'),
-                password=os.getenv('MYSQL_PASSWORD'),
-                host=os.getenv('MYSQL_HOST'),
-                database=os.getenv('MYSQL_DATABASE'),
-                port=os.getenv('MYSQL_PORT')
+                user=os.getenv("MYSQL_USER"),
+                password=os.getenv("MYSQL_PASSWORD"),
+                host=os.getenv("MYSQL_HOST"),
+                database=os.getenv("MYSQL_DATABASE"),
+                port=os.getenv("MYSQL_PORT"),
             )
             self.cursor = self.conn.cursor()
         except mysql.connector.Error as err:
@@ -80,12 +83,7 @@ class RelationalDB:
         """
         for page in pages:
             page_id = str(uuid.uuid4())
-            values = (
-                page_id,
-                page.number,
-                page.text,
-                pdf_id
-            )
+            values = (page_id, page.number, page.text, pdf_id)
             self.cursor.execute(query, values)
             time.sleep(0.001)
 
@@ -104,7 +102,7 @@ class RelationalDB:
         for table in tables:
             table_name = table[0]
             print(f"\nTable: {table_name}")
-            
+
             self.cursor.execute(f"SHOW COLUMNS FROM {table_name}")
             columns = self.cursor.fetchall()
             print("Columns:")
@@ -112,29 +110,40 @@ class RelationalDB:
                 print(column[0], end=" | ")
             print("\n")
 
-    def find_or_create_inverted_index(self, word: str):
-        query = "SELECT id FROM InvertedIndex WHERE word = %s"
-        self.cursor.execute(query, (word,))
-        result = self.cursor.fetchone()
+    def find_or_create_inverted_index(self, word: str, inverted: list[tuple]) -> str:
+        for inv in inverted:
+            if word == inv[1]:
+                return inv[0]
+            
+        inverted_index_id = str(uuid.uuid4())
+        self.inverted.append((inverted_index_id, word))
 
-        if not result:
-            inverted_index_id = str(uuid.uuid4())
-            query = """
-            INSERT INTO InvertedIndex (id, word)
-            VALUES (%s, %s)
-            """
-            values = (inverted_index_id, word)
-            self.cursor.execute(query, values)
-            self.conn.commit()
-            time.sleep(0.001)
-            logger.info(f"InvertedIndex word: {word} created.")
+        return inverted_index_id
+    
+        # query = "SELECT id FROM InvertedIndex WHERE word = %s"
+        # self.cursor.execute(query, (word,))
+        # result = self.cursor.fetchone()
 
-            return inverted_index_id
+        # if not result:
+        #     inverted_index_id = str(uuid.uuid4())
+        #     query = """
+        #     INSERT INTO InvertedIndex (id, word)
+        #     VALUES (%s, %s)
+        #     """
+        #     values = (inverted_index_id, word)
+        #     self.cursor.execute(query, values)
+        #     self.conn.commit()
+        #     time.sleep(0.001)
+        #     logger.info(f"InvertedIndex word: {word} created.")
 
-        return result[0]
+        #     return inverted_index_id
+        # logger.info(f"InvertedIndex word: {word} already exists.")
+        # return result[0]
 
     def create_page_inverted_index(self, pageId: str, invertedIndexId: str):
-        find = "SELECT * from PageInvertedIndex WHERE pageId = %s AND invertedIndexId = %s"
+        find = (
+            "SELECT * from PageInvertedIndex WHERE pageId = %s AND invertedIndexId = %s"
+        )
         self.cursor.execute(find, (pageId, invertedIndexId))
         result = self.cursor.fetchone()
         if result:
@@ -149,7 +158,7 @@ class RelationalDB:
         self.cursor.execute(query, values)
         self.conn.commit()
         logger.info("PageInvertedIndex created.")
-        
+
     def create_pdf_link_inverted_index(self, pdfLinkId: str, invertedIndexId: str):
         find = "SELECT * from PdfLinkInvertedIndex WHERE pdfLinkId = %s AND invertedIndexId = %s"
         self.cursor.execute(find, (pdfLinkId, invertedIndexId))
@@ -157,7 +166,7 @@ class RelationalDB:
         if result:
             logger.info("PdfLinkInvertedIndex already exists.")
             return
-        
+
         query = """
         INSERT INTO PdfLinkInvertedIndex (pdfLinkId, invertedIndexId)
         VALUES (%s, %s)
@@ -167,6 +176,18 @@ class RelationalDB:
         self.conn.commit()
         logger.info("PdfLinkInvertedIndex created.")
 
+    def fast_skip(
+        self,
+        word: str,
+        inverted: list[tuple],
+        page_inverted_index: list[tuple],
+        pdf_link_inverted_index: list[tuple],
+    ) -> bool:
+        inverted_words = {inv[1] for inv in inverted}
+        page_inverted_words = {page_inv[1] for page_inv in page_inverted_index}
+        pdf_link_inverted_words = {pdf_inv[1] for pdf_inv in pdf_link_inverted_index}
+        return word in inverted_words or word in page_inverted_words or word in pdf_link_inverted_words
+
     def invert_index(self):
         logger.info("Fetching all pages")
         # Recuperar todas as páginas e seus textos
@@ -174,13 +195,28 @@ class RelationalDB:
         self.cursor.execute(query)
         pages = self.cursor.fetchall()
 
+        logger.info("Fetching all inverted index")
+        query_inverted = "SELECT id, word FROM InvertedIndex"
+        self.cursor.execute(query_inverted)
+        self.inverted = self.cursor.fetchall()
+
+
+        logger.info("Fetching all page inverted index")
+        query_page_inverted_index = "SELECT * FROM PageInvertedIndex"
+        self.cursor.execute(query_page_inverted_index)
+        page_inverted_index = self.cursor.fetchall()
+
+        logger.info("Fetching all pdf link inverted index")
+        query_pdf_link_inverted_index = "SELECT * FROM PdfLinkInvertedIndex"
+        self.cursor.execute(query_pdf_link_inverted_index)
+        pdf_link_inverted_index = self.cursor.fetchall()
+
         # Construir o índice invertido
         for id, pdfLinkId, text in pages:
-            palavras = re.findall(r'\b\w+\b', text.lower())
-            for palavra in palavras:
-                inverte_index_id = self.find_or_create_inverted_index(palavra)
+            words = re.findall(r"\b\w+\b", text.lower())
+            for word in words:
+                inverte_index_id = self.find_or_create_inverted_index(word)
                 page_id = id
                 self.create_page_inverted_index(page_id, inverte_index_id)
                 self.create_pdf_link_inverted_index(pdfLinkId, inverte_index_id)
                 logger.success("Word finished!")
-                
