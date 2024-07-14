@@ -12,6 +12,7 @@
     "pydantic",
     "pytz",
     "urllib",
-    "visivel"
+    "visivel",
+    "zustand"
   ]
 }
