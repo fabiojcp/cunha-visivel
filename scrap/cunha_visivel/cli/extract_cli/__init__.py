@@ -10,7 +10,6 @@ from tqdm import tqdm
 from PIL import Image
 from pdf2image import convert_from_path
 from loguru import logger
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from cunha_visivel.workdir.structs import CunhaVisivelDB
 
@@ -131,6 +130,8 @@ def extract_cli(workdir: str, limit: int | None, empty_pages: bool) -> None:
         empty_urls = db.log_empty_pages()
 
         if empty_urls:
+            for url in empty_urls:
+                logger.info(f"PDF link {url} has no pages.")
             logger.info(f"A total of {len(empty_urls)} PDFs have no pages.")
         else:
             logger.success("All PDFs have pages.")
@@ -145,23 +146,20 @@ def extract_cli(workdir: str, limit: int | None, empty_pages: bool) -> None:
     tessdata_path = get_tessdata_path()
     config_flags = rf"--tessdata-dir {shlex.quote(str(tessdata_path))}"
 
-    pdf_paths = [pdf_dir / each_path for each_path in os.listdir(pdf_dir) if each_path.endswith(".pdf")]
-    if limit:
-        pdf_paths = pdf_paths[:limit]
-
-    with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
-        futures = {executor.submit(process_pdf, pdf_path, images_dir, config_flags, db): pdf_path for pdf_path in pdf_paths}
-
-        for future in tqdm(as_completed(futures), total=len(futures), desc="Processing PDFs"):
-            pdf_path = futures[future]
-            try:
-                pages_text = future.result()
-                update_json(json_path, str(pdf_path), pages_text, db)
-            except Exception as e:
-                logger.error(f"Failed to process {pdf_path}: {e}")
+    reached_limit = 0
+    count = 0
+    for each_path in os.listdir(pdf_dir):
+        if each_path.endswith(".pdf"):
+            if reached_limit == limit:
+                break
+            pdf_path = pdf_dir / each_path
+            pages_text = process_pdf(pdf_path, images_dir, config_flags, db)
+            update_json(json_path, str(pdf_path), pages_text, db)
+            reached_limit += 1
+            count += 1
 
     shutil.rmtree(images_dir)
-    logger.success(f"Total of {len(pdf_paths)} processed. Done!")
+    logger.success(f"Total of {count} processed. Done!")
 
 
 if __name__ == "__main__":

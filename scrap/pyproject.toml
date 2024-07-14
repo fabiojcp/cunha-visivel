@@ -35,5 +35,6 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.scripts]
 scrap = "cunha_visivel.cli:cunha_cli"
 extract = "cunha_visivel.cli.extract_cli:extract_cli"
+syncdb = "cunha_visivel.cli.sync_cli:sync_cli"
 
 
